@@ -14,7 +14,7 @@ MY_LINK = "https://your-site.com/visa-info"
 # ==========================================
 # 1. НАСТРОЙКИ (ЗАМЕНИТЕ НА СВОИ ДАННЫЕ)
 # ==========================================
-APP_SECRET = "f072f0557e81672b004bd3a2a90a1bfe"
+APP_SECRET = os.getenv("APP_SECRET")
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 IG_USER_ID = os.getenv("IG_USER_ID")
