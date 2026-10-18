@@ -21,39 +21,40 @@
    ```bash
    git clone https://github.com/ваш-ник/Insta_webhook.git
    cd Insta_webhook
-   
 Создайте виртуальное окружение и активируйте его:
 
-bash
+```bash
 python3 -m venv venv
 source venv/bin/activate  # Для Mac/Linux
 # venv\Scripts\activate   # Для Windows
+```
 Установите зависимости:
 
-bash
+   ```bash
 pip install -r requirements.txt
-Шаг 2: Настройка секретов (.env)
-
+```
+# Шаг 2: Настройка секретов (.env)
+```
 Создайте файл .env в корне проекта (на основе .env.example) и заполните его:
 
-env
-# Пароль для верификации вебхука (придумайте любой)
+
+ Пароль для верификации вебхука (придумайте любой)
 VERIFY_TOKEN=my_super_secret_token
 
-# Основной секрет приложения (App Settings -> Basic)
+ Основной секрет приложения (App Settings -> Basic)
 APP_SECRET=ваш_app_secret
 
-# ВАЖНО: Для Instagram Login используется вложенный секрет!
-# (Вкладка "Сценарии использования" -> "Настройка API для входа в Instagram")
+ ВАЖНО: Для Instagram Login используется вложенный секрет!
+ (Вкладка "Сценарии использования" -> "Настройка API для входа в Instagram")
 INSTAGRAM_APP_SECRET=ваш_instagram_app_secret
 
-# Токен доступа (Instagram User Access Token, начинается на IG...)
+ Токен доступа (Instagram User Access Token, начинается на IG...)
 ACCESS_TOKEN=ваш_instagram_access_token
 
-# ID вашего Instagram Business аккаунта 
-IG_USER_ID=ваш id
-
-Шаг 3: Настройка Meta for Developers
+ID вашего Instagram Business аккаунта (начинается на 17841...)
+IG_USER_ID=17841452190712859
+```
+# Шаг 3: Настройка Meta for Developers
 
 Создайте приложение на developers.facebook.com.
 Добавьте продукт Instagram API with Instagram Login (или Facebook Login, в зависимости от вашего сценария).
@@ -62,17 +63,20 @@ IG_USER_ID=ваш id
 Callback URL: https://<ваш-домен-ngrok>.ngrok-free.app/webhook
 Verify Token: Тот же, что в .env (VERIFY_TOKEN).
 Подпишитесь на события: comments и messages.
-Шаг 4: Запуск и тестирование
 
-Запустите Ngrok (в отдельном терминале):
+# Шаг 4: Запуск и тестирование
 
-bash
+### Запустите Ngrok (в отдельном терминале):
+
+```bash
 ngrok http 8001
+```
 Скопируйте HTTPS-ссылку и обновите Callback URL в панели Meta.
 Запустите сервер:
 
-bash
+```bash
 uvicorn main:app --reload --port 8001
+```
 Напишите комментарий со словом «бот» под любым постом. Бот должен отправить ЛС и публичный ответ.
 ⚠️ Известные тонкости и проблемы (Troubleshooting)
 
