@@ -1,7 +1,7 @@
 import os
+import re
 import hmac
 import hashlib
-import json
 import httpx
 from fastapi import FastAPI, Request, Response, HTTPException, BackgroundTasks
 from dotenv import load_dotenv
@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 load_dotenv()
 app = FastAPI()
 
-MY_LINK = "https://your-site.com/visa-info"
 # ==========================================
 # 1. НАСТРОЙКИ (ЗАМЕНИТЕ НА СВОИ ДАННЫЕ)
 # ==========================================
@@ -82,7 +81,7 @@ async def receive_webhook(request: Request, background_tasks: BackgroundTasks):
                     text = val.get("text", "")
                     from_id = val.get("from", {}).get("id")
 
-                    # Защита от эхо (игнорируем свои же ответы)
+                    # Защита эхо (игнорируем свои же ответы)
                     if from_id == IG_USER_ID:
                         continue
 
@@ -96,22 +95,39 @@ async def receive_webhook(request: Request, background_tasks: BackgroundTasks):
 # 5. ЛОГИКА ОБРАБОТКИ
 # ==========================================
 async def process_comment(comment_id: str, text: str):
-    """Проверяем ключевое слово и запускаем отправку"""
     text_lower = text.lower()
 
-    # Если в тексте есть слово "бот"
-    if "бот" in text_lower:
-        print(f"🤖 Найдено слово 'бот'. Отправляем в ЛС...")
+    KEYWORD_LINKS = {
+        "бот": "https://your-site.com/visa-info",
+        "хочу": "https://github.com/valdik305/Insta_webhook,\n Если лень заморачиваться я могу помочь с подключением !",
+        "локация": "https://maps.app.goo.gl/2ksGkXXQQZvA1bW99?g_st=ic",
+        "инфо": "https://your-site.com/about-us"
+    }
 
-        # 1. Сначала пытаемся отправить сообщение в Direct
-        dm_success = await send_private_reply(comment_id, f"Привет! Вот ссылка, которую вы просили: {MY_LINK}")
+    matched_keyword = None
+    link_to_send = None
+
+    for keyword, link in KEYWORD_LINKS.items():
+        # Регулярное выражение \b ищет точное совпадение слова (с учетом знаков препинания)
+        if re.search(rf'\b{keyword}\b', text_lower):
+            matched_keyword = keyword
+            link_to_send = link
+            break
+
+    if matched_keyword:
+        print(f"🤖 Найдено слово '{matched_keyword}'. Отправляем в ЛС...")
+
+        # 1. Отправляем сообщение в Direct с нужной ссылкой
+        dm_success = await send_private_reply(
+            comment_id,
+            f"Привет! Вот ссылка, которую вы просили: {link_to_send}"
+        )
 
         # 2. Если сообщение в ЛС ушло успешно, оставляем публичный комментарий
         if dm_success:
             print(f"💬 Оставляем публичный ответ под комментарием...")
             await send_public_reply(comment_id, "Ссылка отправлена вам в личные сообщения! 📩")
         else:
-            # Если пользователь закрыл ЛС, публично просим его открыть
             await send_public_reply(comment_id,
                                     "Не удалось отправить сообщение. Пожалуйста, откройте доступ к личным сообщениям (Direct) и напишите нам!")
 
